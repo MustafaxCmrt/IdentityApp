@@ -1,0 +1,78 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# JetBrains Rider
+.idea/
+**/.idea/
+*.sln.iml
+*.iws
+*.DotSettings.user
+
+# Build & Artifacts
+bin/
+obj/
+out/
+[Bb]uild/
+[Bb]uilds/
+artifacts/
+publish/
+dist/
+
+# Test & Coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+.coverage/
+BenchmarkDotNet.Artifacts/
+
+# Packages
+packages/
+*.nupkg
+*.snupkg
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Web Frontend
+node_modules/
+bower_components/
+.sass-cache/
+.cache/
+.pnp.*
+.pnpm-store/
+wwwroot/lib/
+wwwroot/node_modules/
+wwwroot/img/
+
+# Environment & Secrets
+.env
+.env.*
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+*.Secrets.json
+secrets.json
+
+# Publish Profiles (user-specific)
+*.pubxml.user
+*.publishsettings
+Properties/PublishProfiles/*.*user
+
+# Databases & Dumps
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+*.mysql
+*.dump
+*.cnf
+*.my.cnf
+
+# Temporary/System
+~$*

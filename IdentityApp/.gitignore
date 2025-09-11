@@ -74,5 +74,8 @@ Properties/PublishProfiles/*.*user
 *.cnf
 *.my.cnf
 
+#Txt file
+*.txt
+
 # Temporary/System
 ~$*

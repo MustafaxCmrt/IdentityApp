@@ -32,7 +32,7 @@ public class UsersController : Controller
     {
         if (ModelState.IsValid)
         {
-            var user = new AppUser { UserName = model.Email, Email = model.Email, FullName = model.FullName };
+            var user = new AppUser { UserName = "user"+new Random().Next(1,99999), Email = model.Email, FullName = model.FullName };
             IdentityResult result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
                 return RedirectToAction("Index");
@@ -84,8 +84,14 @@ public class UsersController : Controller
                     await _userManager.RemovePasswordAsync(user);
                     await _userManager.AddPasswordAsync(user, model.Password);
                 }
+
                 if (result.Succeeded)
+                {
+                    await _userManager.RemoveFromRolesAsync(user, await _userManager.GetRolesAsync(user));
+                    if(model.SelectedRoles != null)
+                        await _userManager.AddToRolesAsync(user, model.SelectedRoles);
                     return RedirectToAction("Index");
+                }
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError("",error.Description);

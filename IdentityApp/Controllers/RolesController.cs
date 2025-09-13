@@ -10,10 +10,12 @@ public class RolesController : Controller
 {
     private readonly RoleManager<AppRole> _roleManager;
     private readonly IdentityContext _context;
-    public RolesController(RoleManager<AppRole> roleManager , IdentityContext context)
+    private readonly UserManager<AppUser> _userManager;
+    public RolesController(RoleManager<AppRole> roleManager , IdentityContext context ,  UserManager<AppUser> userManager)
     {
         _roleManager = roleManager;
         _context = context;
+        _userManager = userManager;
     }
 
     // public IActionResult Index()
@@ -106,6 +108,36 @@ public class RolesController : Controller
             var result = await _roleManager.CreateAsync(model);
             if (result.Succeeded) return RedirectToAction(nameof(Index));
             foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
+        }
+        return View(model);
+    }
+
+    public async Task<IActionResult> Edit(string id)
+    {
+        var role = await _roleManager.FindByIdAsync(id);
+        if (role != null && role.Name != null)
+        {
+            ViewBag.Users = await _userManager.GetUsersInRoleAsync(role.Name);
+            return View(role);   
+        }
+        return RedirectToAction("Index");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(AppRole model)
+    {
+        if (ModelState.IsValid)
+        {
+            var role = await _roleManager.FindByIdAsync(model.Id);
+            if (role != null)
+            {
+                role.Name = model.Name;
+                var result = await _roleManager.UpdateAsync(role);
+                if (result.Succeeded) return RedirectToAction(nameof(Index));
+                foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
+                if (role.Name != null)
+                    ViewBag.Users = await _userManager.GetUsersInRoleAsync(role.Name);
+            }
         }
         return View(model);
     }

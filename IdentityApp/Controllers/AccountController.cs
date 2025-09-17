@@ -31,6 +31,11 @@ public class AccountController : Controller
             if (user != null)
             {
                 await _signInManager.SignOutAsync();
+                if(!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError("","confirm your account");
+                    return View(model);
+                }
                 var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
                 if (result.Succeeded)
                 {
@@ -55,5 +60,55 @@ public class AccountController : Controller
             ModelState.AddModelError("","No user found for this email");
         }
         return View(model);
+    }
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var user = new AppUser { UserName = "user"+new Random().Next(1,99999), Email = model.Email, FullName = model.FullName };
+            IdentityResult result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var url = Url.Action("ConfirmEmail", "Account", new { user.Id, token });
+                TempData["message"] = "Click on the confirmation email in your email account.";
+                return RedirectToAction("Login","Account");
+            }
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        return View(model);
+    }
+
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
+    {
+        if (userId == null || token == null)
+        {
+            TempData["message"] = "invalid token information";
+            return View();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user != null)
+        {
+            var result =await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                TempData["message"] = "Email confirmed";
+                return RedirectToAction("Login", "Account");
+            }
+        }
+        TempData["message"] = "user not found";
+        return View();
+
     }
 }

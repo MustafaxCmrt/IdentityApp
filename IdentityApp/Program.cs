@@ -1,10 +1,21 @@
 using IdentityApp.Data;
+using IdentityApp.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>(i => 
+    new SmtpEmailSender(
+    builder.Configuration["EmailSender:Host"],
+    builder.Configuration.GetValue<int>("EmailSender:Port"),
+    builder.Configuration.GetValue<bool>("EmailSender:EnableSsl"),
+    builder.Configuration["EmailSender:Username"],
+    builder.Configuration["EmailSender:Password"]
+));
+    
+    
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -17,7 +28,7 @@ builder.Services.AddDbContext<IdentityContext>(options =>
     options.UseMySql(connectionString, version);
 });
 
-builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<IdentityContext>();
+builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -31,6 +42,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
+    options.SignIn.RequireConfirmedEmail = true;
 });
 
 builder.Services.ConfigureApplicationCookie(options =>
